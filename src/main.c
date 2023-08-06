@@ -22,12 +22,17 @@ int main (int argc, char* argv[]) {
 		exit(0);
 	}
 
+	//this loop feels particularly suboptimal
 	bool is_verbose = false;
 	bool is_fuzzy = false;
 	for (int i = 1; i < argc; i++) {
 		char* arg = argv[i];
-		is_verbose = is_verbose || !strcmp(arg, "-v");
-		is_fuzzy = is_fuzzy || !strcmp(arg, "-f");
+		bool has_vf_flag = !strcmp(arg, "-vf") || !strcmp(arg, "-fv");
+		bool has_v_flag = !strcmp(arg, "-v");
+		bool has_f_flag = !strcmp(arg, "-f");
+
+		is_verbose = is_verbose || has_vf_flag || has_v_flag;
+		is_fuzzy = is_fuzzy || has_vf_flag || has_f_flag;
 	}
 
 	if (is_verbose) printf("Running in verbose mode.\n");
