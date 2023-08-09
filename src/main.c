@@ -16,20 +16,16 @@
 //Constant Definitions
 const char* VALID_NUMERALS = "IVXLCDM";
 
-//Structure Definitions
-typedef struct Options {
-	bool is_fuzzy;
-	bool is_verbose;
-} Options
-
 //Function Declarations
-
-bool get_options(int argc, char* argv[]);
+void set_global_options(int argc, char* argv[]);
 bool is_valid_arg(char* arg);
-bool is_well_structured(char* arg);
+bool is_poor_arg(char* arg);
+void handle_poor_arg(arg);
 int convert_arg(char* arg);
 
-//Constant
+//Global Variable Definiton
+bool is_fuzzy = false;
+bool is_verbose = false;
 
 //Main Function
 int main (int argc, char* argv[]) {
@@ -38,10 +34,10 @@ int main (int argc, char* argv[]) {
 		exit(0);
 	}
 
-	Options o = get_options(argc, argv);
+	set_global_options(argc, argv);
 
-	if (o.is_verbose) printf(VERBOSE_MSG);
-	if (o.is_verbose && is_fuzzy) printf(FUZZY_MSG);
+	if (is_verbose) printf(VERBOSE_MSG);
+	if (is_verbose && is_fuzzy) printf(FUZZY_MSG);
 
 	for (int i = 1; i < argc; i++) {
 		char* arg = argv[i];
@@ -52,18 +48,11 @@ int main (int argc, char* argv[]) {
 			continue;
 		}
 
-		bool is_poor_structure = !is_well_structured(arg);
-
-		if (o.is_verbose && is_poor_structure) print(POOR_STRUCT_ERR, arg);
-
-		if (o.is_verbose && !o.is_fuzzy && is_well_structured(arg)) {
-			printf(POOR_STRUCT_SKIP_MSG);
-			continue;
-		} else {
-			printf(POOR_STRUCT_RESOLVE_MSG);
-		}
+		//not sure that I like hiding side effects inside handle_poor_arg
+		if (!is_poor_arg(arg) && handle_poor_arg(arg)) continue;
 
 		int value = convert_arg(arg);
+
 		if (is_verbose) {
 			printf(RESULT_MSG, arg, value);
 		} else {
@@ -74,25 +63,19 @@ int main (int argc, char* argv[]) {
 	exit(0);
 }
 
-bool get_options(int argc, char* argv[]) {
-	Options o = {
-		.is_fuzzy = false;
-		.is_verbose = false;
-	}
-
+void set_global_options(int argc, char* argv[]) {
 	for (int i = 1; i < argc; i++) {
 		char* arg = argv[i];
 		bool has_vf_flag = !strcmp(arg, "-vf") || !strcmp(arg, "-fv");
 		bool has_v_flag = !strcmp(arg, "-v");
 		bool has_f_flag = !strcmp(arg, "-f");
 
-		o.is_verbose = o.is_verbose || has_vf_flag || has_v_flag;
-		o.is_fuzzy = o.is_fuzzy || has_vf_flag || has_f_flag;
+		is_verbose = is_verbose || has_vf_flag || has_v_flag;
+		is_fuzzy = is_fuzzy || has_vf_flag || has_f_flag;
 	}
-
-	return o;
 }
 
+//TODO: this function is incomplete
 bool is_valid_arg(char* arg) {
 	int i = 0;
 	char letter = arg[0];
@@ -104,8 +87,25 @@ bool is_valid_arg(char* arg) {
 	return true;
 }
 
+bool is_poor_arg(char* arg) {
+	return true;
+}
+
+//I'm not a fan of the logic in this function
+bool handle_poor_arg(char* arg) {
+	if (is_verbose) printf(POOR_STRUCT_ERR, arg);
+
+	if (is_verbose && !is_fuzzy) {
+		printf(POOR_STRUCT_SKIP_MSG);
+		return true;
+	}
+
+	if (!is_fuzzy) return true;
+
+	if (is_verbose) printf(POOR_STRUCT_RESOLVE_MSG);
+	return false;
+}
+
 int convert_arg(char* arg) {
-	//in here we need to check for fuzzy behaviour
-	//we can return a -1 if this is invalid and vuzzy
 	return 0;
 }
