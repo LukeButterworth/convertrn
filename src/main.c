@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 //String Literal Definitions
 #define NO_ARG_ERR "No argument provided.\n"
@@ -14,13 +15,14 @@
 #define POOR_STRUCT_SKIP_MSG "Skipping argument.\n"
 
 //Constant Definitions
-const char* VALID_NUMERALS = "IVXLCDM";
+const char* VALID_NUMERALS = "IiVvXxLlCcDdMm";
+const int VALID_NUMERAL_COUNT = 14;
 
 //Function Declarations
 void set_global_options(int argc, char* argv[]);
 bool is_valid_arg(char* arg);
 bool is_poor_arg(char* arg);
-void handle_poor_arg(arg);
+bool handle_poor_arg(char* arg);
 int convert_arg(char* arg);
 
 //Global Variable Definiton
@@ -56,7 +58,7 @@ int main (int argc, char* argv[]) {
 		if (is_verbose) {
 			printf(RESULT_MSG, arg, value);
 		} else {
-			printf("%d", value);
+			printf("%d\n", value);
 		}
 	}
 
@@ -75,15 +77,19 @@ void set_global_options(int argc, char* argv[]) {
 	}
 }
 
-//TODO: this function is incomplete
 bool is_valid_arg(char* arg) {
-	int i = 0;
-	char letter = arg[0];
-	while (letter != '\0') {
-		if () return false;
-		i++;
-		letter = arg[i];
+	int arg_length = strlen(arg);
+	for (int i = 0; i < arg_length; i++) {
+		bool is_valid_char = false;
+
+		for (int j = 0; j < VALID_NUMERAL_COUNT; j++) {
+			is_valid_char = VALID_NUMERALS[j] == arg[i];
+			if (is_valid_char) break;
+		}
+
+		if (!is_valid_char) return false;
 	}
+
 	return true;
 }
 
@@ -108,4 +114,34 @@ bool handle_poor_arg(char* arg) {
 
 int convert_arg(char* arg) {
 	return 0;
+}
+
+//I'm not a fan of this structure but it is what it is
+int convert_char(char value) {
+	int result = 0;
+	switch (tolower(value)) {
+		case 'i':
+			result = 1;
+			break;
+		case 'v':
+			result = 5;
+			break;
+		case 'x':
+			result = 10;
+			break;
+		case 'l':
+			result = 50;
+			break;
+		case 'c':
+			result = 100;
+			break;
+		case 'd':
+			result = 500;
+			break;
+		case 'm':
+			result = 1000;
+			break;
+	}
+
+	return result;
 }
